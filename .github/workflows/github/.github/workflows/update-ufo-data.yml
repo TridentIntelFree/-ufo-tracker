@@ -1,0 +1,31 @@
+name: Update UFO Data
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Daily at midnight
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4
+      
+      - name: Scrape UFO data
+        run: python scrape_ufo_data.py
+      
+      - name: Commit changes
+        run: |
+          git config --global user.name 'UFO Bot'
+          git config --global user.email 'ufo@tracker.com'
+          git add ufo-data.json
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update UFO data $(date +'%Y-%m-%d')"
+          git push
