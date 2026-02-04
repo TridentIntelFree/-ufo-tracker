@@ -1,0 +1,35 @@
+{
+  "updated": "2026-02-03T00:00:00Z",
+  "reports": [
+    {
+      "date": "2026-02-02",
+      "city": "Phoenix",
+      "state": "AZ",
+      "lat": 33.4484,
+      "lng": -112.074,
+      "shape": "Light",
+      "duration": "5 minutes",
+      "summary": "Bright light moving erratically across sky"
+    },
+    {
+      "date": "2026-02-01",
+      "city": "Roswell",
+      "state": "NM",
+      "lat": 33.3943,
+      "lng": -104.5230,
+      "shape": "Disk",
+      "duration": "10 minutes",
+      "summary": "Disc-shaped object hovering over desert"
+    },
+    {
+      "date": "2026-01-31",
+      "city": "Seattle",
+      "state": "WA",
+      "lat": 47.6062,
+      "lng": -122.3321,
+      "shape": "Triangle",
+      "duration": "2 minutes",
+      "summary": "Triangular craft with three lights"
+    }
+  ]
+}
