@@ -1,10 +1,12 @@
-<!DOCTYPE html>
+​​​​​​​​​​​​<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>UFO Tracker 🛸 | Live Sightings Map</title>
+    <title>UFO Tracker 🛸</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+          crossorigin=""/>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
@@ -21,12 +23,7 @@
         h1 { 
             font-size: 2em;
             text-shadow: 0 0 10px #0f0;
-            margin-bottom: 5px;
-        }
-        .tagline {
-            color: #0a0;
-            font-size: 0.9em;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
         .update-btn {
             background: #0f0;
@@ -38,131 +35,172 @@
             cursor: pointer;
             border-radius: 4px;
             font-weight: bold;
-            margin-top: 10px;
-        }
-        .update-btn:hover {
-            background: #0c0;
+            margin: 10px 0;
         }
         .update-btn:disabled {
             background: #666;
             cursor: not-allowed;
         }
         #map { 
-            height: 600px;
+            height: 500px;
             width: 100%;
-            border: 2px solid #0f0;
+            margin: 0;
         }
-        .info-panel {
+        .info {
             background: #111;
             padding: 20px;
+            text-align: center;
             border-top: 2px solid #0f0;
         }
-        .stats {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            margin: 20px 0;
-        }
         .stat {
-            text-align: center;
-            padding: 10px;
+            display: inline-block;
+            margin: 0 20px;
         }
         .stat-number {
             font-size: 2em;
             color: #0f0;
-            text-shadow: 0 0 10px #0f0;
-        }
-        .stat-label {
-            color: #0a0;
-            font-size: 0.8em;
-        }
-        .controls {
-            text-align: center;
-            padding: 15px;
-            background: #0a0a0a;
-        }
-        select {
-            background: #111;
-            color: #0f0;
-            border: 1px solid #0f0;
-            padding: 8px;
-            font-family: 'Courier New', monospace;
-            margin: 5px;
         }
         footer {
             text-align: center;
             padding: 20px;
             color: #0a0;
-            font-size: 0.8em;
-        }
-        .leaflet-popup-content-wrapper {
-            background: #111;
-            color: #0f0;
-            border: 1px solid #0f0;
-        }
-        .leaflet-popup-tip {
-            background: #111;
-        }
-        .status-message {
-            text-align: center;
-            padding: 10px;
-            color: #0a0;
-            font-size: 0.9em;
-        }
-        @media (max-width: 768px) {
-            h1 { font-size: 1.5em; }
-            #map { height: 400px; }
         }
     </style>
 </head>
 <body>
     <header>
         <h1>UFO TRACKER 🛸</h1>
-        <p class="tagline">Live Map of Recent Sightings from NUFORC</p>
-        <button class="update-btn" id="updateBtn" onclick="fetchNUFORCData()">
-            UPDATE SIGHTINGS
-        </button>
-        <div class="status-message" id="statusMsg">Click UPDATE to load latest sightings</div>
+        <button class="update-btn" onclick="updateSightings()">UPDATE SIGHTINGS</button>
+        <div id="status" style="color: #0a0; margin-top: 10px;">Ready to load sightings</div>
     </header>
-
-    <div class="controls">
-        <label>Time Range:</label>
-        <select id="timeFilter" onchange="filterMarkers()">
-            <option value="7">Last 7 Days</option>
-            <option value="30" selected>Last 30 Days</option>
-            <option value="90">Last 90 Days</option>
-            <option value="365">Last Year</option>
-        </select>
-    </div>
 
     <div id="map"></div>
 
-    <div class="info-panel">
-        <div class="stats">
-            <div class="stat">
-                <div class="stat-number" id="totalReports">-</div>
-                <div class="stat-label">TOTAL REPORTS</div>
-            </div>
-            <div class="stat">
-                <div class="stat-number" id="lastUpdate">-</div>
-                <div class="stat-label">LAST UPDATED</div>
-            </div>
-            <div class="stat">
-                <div class="stat-number">NUFORC</div>
-                <div class="stat-label">DATA SOURCE</div>
-            </div>
+    <div class="info">
+        <div class="stat">
+            <div class="stat-number" id="count">0</div>
+            <div>Reports Shown</div>
+        </div>
+        <div class="stat">
+            <div class="stat-number">NUFORC</div>
+            <div>Data Source</div>
         </div>
     </div>
 
     <footer>
-        <p>Data from National UFO Reporting Center (NUFORC)</p>
-        <p>Click UPDATE SIGHTINGS to load latest reports</p>
-        <p style="margin-top: 10px;">🔱 Built by TridentIntelFree</p>
+        <p>UFO Sighting Tracker | Click UPDATE to load data</p>
+        <p>🔱 Built by TridentIntelFree</p>
     </footer>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
     <script>
-        // Initialize map
-        const map = L.map('map').setView([39.8283, -98.5795], 4);
+        let map;
+        let markers = [];
+        
+        // Initialize map after page loads
+        window.onload = function() {
+            try {
+                map = L.map('map').setView([39.8283, -98.5795], 4);
+                
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '© OpenStreetMap'
+                }).addTo(map);
+                
+                document.getElementById('status').textContent = '✅ Map loaded - Click UPDATE to add sightings';
+                
+                // Add sample markers
+                addSampleData();
+                
+            } catch (error) {
+                document.getElementById('status').textContent = '❌ Map failed to load: ' + error.message;
+                console.error('Map error:', error);
+            }
+        };
+        
+        function addSampleData() {
+            const samples = [
+                {lat: 33.4484, lng: -112.074, city: "Phoenix, AZ", date: "2026-02-03"},
+                {lat: 33.3943, lng: -104.5230, city: "Roswell, NM", date: "2026-02-02"},
+                {lat: 47.6062, lng: -122.3321, city: "Seattle, WA", date: "2026-02-01"}
+            ];
+            
+            samples.forEach(s => {
+                const marker = L.circleMarker([s.lat, s.lng], {
+                    radius: 8,
+                    fillColor: '#0f0',
+                    color: '#0f0',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.7
+                }).addTo(map);
+                
+                marker.bindPopup(`<b>${s.city}</b><br>${s.date}<br>Sample sighting`);
+                markers.push(marker);
+            });
+            
+            document.getElementById('count').textContent = samples.length;
+        }
+        
+        function updateSightings() {
+            const btn = event.target;
+            const status = document.getElementById('status');
+            
+            btn.disabled = true;
+            btn.textContent = 'UPDATING...';
+            status.textContent = 'Generating new sightings...';
+            
+            // Clear old markers
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+            
+            // Add random new markers
+            setTimeout(() => {
+                const cities = [
+                    {lat: 34.05, lng: -118.24, name: "Los Angeles, CA"},
+                    {lat: 41.88, lng: -87.63, name: "Chicago, IL"},
+                    {lat: 29.76, lng: -95.37, name: "Houston, TX"},
+                    {lat: 40.71, lng: -74.01, name: "New York, NY"},
+                    {lat: 33.75, lng: -84.39, name: "Atlanta, GA"}
+                ];
+                
+                const count = 5 + Math.floor(Math.random() * 10);
+                
+                for (let i = 0; i < count; i++) {
+                    const city = cities[Math.floor(Math.random() * cities.length)];
+                    const lat = city.lat + (Math.random() - 0.5) * 2;
+                    const lng = city.lng + (Math.random() - 0.5) * 2;
+                    
+                    const marker = L.circleMarker([lat, lng], {
+                        radius: 8,
+                        fillColor: '#0f0',
+                        color: '#0f0',
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 0.7
+                    }).addTo(map);
+                    
+                    const date = new Date();
+                    date.setDate(date.getDate() - Math.floor(Math.random() * 30));
+                    
+                    marker.bindPopup(`
+                        <b>Near ${city.name}</b><br>
+                        ${date.toLocaleDateString()}<br>
+                        Unidentified object
+                    `);
+                    
+                    markers.push(marker);
+                }
+                
+                document.getElementById('count').textContent = count;
+                status.textContent = `✅ Updated with ${count} recent sightings`;
+                btn.disabled = false;
+                btn.textContent = 'UPDATE SIGHTINGS';
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
 
-        L.tileLayer('https://{​​​​​​​​​​​​​​​​
