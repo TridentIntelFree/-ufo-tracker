@@ -26,6 +26,26 @@
         .tagline {
             color: #0a0;
             font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+        .update-btn {
+            background: #0f0;
+            color: #000;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1em;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .update-btn:hover {
+            background: #0c0;
+        }
+        .update-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
         }
         #map { 
             height: 600px;
@@ -83,17 +103,31 @@
         .leaflet-popup-tip {
             background: #111;
         }
+        .status-message {
+            text-align: center;
+            padding: 10px;
+            color: #0a0;
+            font-size: 0.9em;
+        }
+        @media (max-width: 768px) {
+            h1 { font-size: 1.5em; }
+            #map { height: 400px; }
+        }
     </style>
 </head>
 <body>
     <header>
         <h1>UFO TRACKER 🛸</h1>
-        <p class="tagline">Live Map of Recent Sightings | Auto-Updated Daily</p>
+        <p class="tagline">Live Map of Recent Sightings from NUFORC</p>
+        <button class="update-btn" id="updateBtn" onclick="fetchNUFORCData()">
+            UPDATE SIGHTINGS
+        </button>
+        <div class="status-message" id="statusMsg">Click UPDATE to load latest sightings</div>
     </header>
 
     <div class="controls">
         <label>Time Range:</label>
-        <select id="timeFilter">
+        <select id="timeFilter" onchange="filterMarkers()">
             <option value="7">Last 7 Days</option>
             <option value="30" selected>Last 30 Days</option>
             <option value="90">Last 90 Days</option>
@@ -114,7 +148,7 @@
                 <div class="stat-label">LAST UPDATED</div>
             </div>
             <div class="stat">
-                <div class="stat-number" id="dataSource">NUFORC</div>
+                <div class="stat-number">NUFORC</div>
                 <div class="stat-label">DATA SOURCE</div>
             </div>
         </div>
@@ -122,82 +156,13 @@
 
     <footer>
         <p>Data from National UFO Reporting Center (NUFORC)</p>
-        <p>Updates automatically every 24 hours</p>
+        <p>Click UPDATE SIGHTINGS to load latest reports</p>
         <p style="margin-top: 10px;">🔱 Built by TridentIntelFree</p>
     </footer>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         // Initialize map
-        const map = L.map('map').setView([39.8283, -98.5795], 4); // Center on USA
+        const map = L.map('map').setView([39.8283, -98.5795], 4);
 
-        // Add dark tile layer
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-            maxZoom: 19
-        }).addTo(map);
-
-        let markers = [];
-
-        // Load UFO data
-        async function loadUFOData() {
-            try {
-                const response = await fetch('ufo-data.json');
-                const data = await response.json();
-                
-                document.getElementById('totalReports').textContent = data.reports.length;
-                document.getElementById('lastUpdate').textContent = new Date(data.updated).toLocaleDateString();
-                
-                displayReports(data.reports);
-            } catch (error) {
-                console.error('Error loading data:', error);
-                document.getElementById('totalReports').textContent = 'ERROR';
-            }
-        }
-
-        function displayReports(reports) {
-            // Clear existing markers
-            markers.forEach(m => map.removeLayer(m));
-            markers = [];
-
-            const timeFilter = parseInt(document.getElementById('timeFilter').value);
-            const cutoffDate = new Date();
-            cutoffDate.setDate(cutoffDate.getDate() - timeFilter);
-
-            reports.forEach(report => {
-                const reportDate = new Date(report.date);
-                if (reportDate < cutoffDate) return;
-
-                if (report.lat && report.lng) {
-                    const marker = L.circleMarker([report.lat, report.lng], {
-                        radius: 6,
-                        fillColor: '#0f0',
-                        color: '#0f0',
-                        weight: 1,
-                        opacity: 0.8,
-                        fillOpacity: 0.6
-                    }).addTo(map);
-
-                    marker.bindPopup(`
-                        <strong>${report.city}, ${report.state}</strong><br>
-                        Date: ${report.date}<br>
-                        Shape: ${report.shape || 'Unknown'}<br>
-                        Duration: ${report.duration || 'Unknown'}<br>
-                        <em>${report.summary ? report.summary.substring(0, 100) + '...' : 'No description'}</em>
-                    `);
-
-                    markers.push(marker);
-                }
-            });
-        }
-
-        // Filter change
-        document.getElementById('timeFilter').addEventListener('change', () => {
-            loadUFOData();
-        });
-
-        // Load data on page load
-        loadUFOData();
-    </script>
-</body>
-</html>
+        L.tileLayer('https://{​​​​​​​​​​​​​​​​
